@@ -1,8 +1,6 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:hote_v2/core/constants/app_assets.dart';
 import 'package:hote_v2/core/theme/app_theme.dart';
-import 'package:hote_v2/features/shell/main_shell_screen.dart';
-import 'package:hote_v2/shared/components/primary_button.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -44,7 +42,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   onSkip: () => _goToPage(2),
                   onBack: () => _goToPage(0),
                 ),
-                _SignInOptionsPage(onBack: () => _goToPage(1)),
+                _IntroIllustrationPageThree(
+                  onSkip: () => _goToPage(2),
+                  onBack: () => _goToPage(1),
+                ),
               ],
             ),
             if (_page < 2)
@@ -55,14 +56,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   onTap: () => _goToPage(_page + 1),
                   borderRadius: BorderRadius.circular(40),
                   child: Container(
-                    width: 62,
+                    width: 100,
                     height: 62,
                     decoration: const BoxDecoration(
                       color: AppTheme.primary,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.chevron_right_rounded,
-                        color: Colors.white, size: 42),
+                    child: const Icon(
+                      Icons.chevron_right_rounded,
+                      color: Colors.white,
+                      size: 50,
+                    ),
                   ),
                 ),
               ),
@@ -112,7 +116,8 @@ class _IntroLogoPage extends StatelessWidget {
             child: TextButton(
               onPressed: onSkip,
               child: const Text('Skip',
-                  style: TextStyle(fontSize: 16, color: Colors.black87)),
+                  style: TextStyle(
+                      fontSize: 20, color: Color.fromARGB(255, 116, 114, 114))),
             ),
           ),
           const Spacer(),
@@ -165,43 +170,29 @@ class _IntroIllustrationPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              IconButton(
-                onPressed: onBack,
-                icon: const Icon(Icons.arrow_back_ios_new_rounded),
-              ),
-              const Spacer(),
-              TextButton(
-                onPressed: onSkip,
-                child: const Text('Skip',
-                    style: TextStyle(fontSize: 16, color: Colors.black87)),
-              ),
-            ],
-          ),
           const SizedBox(height: 16),
           Center(
-            child: Image.asset(AppAssets.onboardingIllustration,
-                height: 300, fit: BoxFit.contain),
+            child: Image.asset(AppAssets.onboardingIllustration2,
+                fit: BoxFit.contain),
           ),
           const SizedBox(height: 28),
           const Text(
             'You are always in control',
             style: TextStyle(
                 color: AppTheme.primary,
-                fontSize: 46,
+                fontSize: 36,
                 fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 18),
           const Text(
             'If you choose to allow tracking, we will use your activity across other app and websites to personalize the ads you see.',
             style: TextStyle(
-                fontSize: 16, color: AppTheme.textPrimary, height: 1.4),
+                fontSize: 18, color: AppTheme.textPrimary, height: 1.4),
           ),
           const SizedBox(height: 16),
           const Text(
             'You can change this any time in your phone setting.',
-            style: TextStyle(fontSize: 16, color: AppTheme.textPrimary),
+            style: TextStyle(fontSize: 18, color: AppTheme.textPrimary),
           ),
         ],
       ),
@@ -209,9 +200,13 @@ class _IntroIllustrationPage extends StatelessWidget {
   }
 }
 
-class _SignInOptionsPage extends StatelessWidget {
-  const _SignInOptionsPage({required this.onBack});
+class _IntroIllustrationPageThree extends StatelessWidget {
+  const _IntroIllustrationPageThree({
+    required this.onSkip,
+    required this.onBack,
+  });
 
+  final VoidCallback onSkip;
   final VoidCallback onBack;
 
   @override
@@ -221,62 +216,30 @@ class _SignInOptionsPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 12),
-          IconButton(
-            onPressed: onBack,
-            icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          ),
-          const SizedBox(height: 44),
-          const Text(
-            'Sign in for Access to your Booking Details',
-            style: TextStyle(
-              color: AppTheme.primary,
-              fontSize: 42,
-              fontWeight: FontWeight.w700,
-              height: 1.25,
-            ),
-          ),
-          const SizedBox(height: 44),
-          const Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'Register',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: AppTheme.primary,
-                    fontWeight: FontWeight.w700,
-                    decoration: TextDecoration.underline,
-                    fontSize: 22,
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Text(
-                  'Login',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: AppTheme.primary,
-                    fontWeight: FontWeight.w700,
-                    decoration: TextDecoration.underline,
-                    fontSize: 22,
-                  ),
-                ),
-              ),
-            ],
+          const SizedBox(height: 16),
+          Center(
+            child: Image.asset(AppAssets.onboardingIllustration3,
+                fit: BoxFit.contain, width: double.infinity),
           ),
           const SizedBox(height: 28),
-          PrimaryButton(label: 'Continue with Google', onPressed: () {}),
-          const SizedBox(height: 12),
-          PrimaryButton(
-            label: 'Continue with Email',
-            onPressed: () {
-              Navigator.pushReplacementNamed(
-                  context, MainShellScreen.routeName);
-            },
+          const Text(
+            'You are always in control',
+            style: TextStyle(
+                color: AppTheme.primary,
+                fontSize: 36,
+                fontWeight: FontWeight.w700),
           ),
-          const SizedBox(height: 12),
-          PrimaryButton(label: 'Continue with Facebook', onPressed: () {}),
+          const SizedBox(height: 18),
+          const Text(
+            'If you choose to allow tracking, we will use your activity across other app and websites to personalize the ads you see.',
+            style: TextStyle(
+                fontSize: 18, color: AppTheme.textPrimary, height: 1.4),
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'You can change this any time in your phone setting.',
+            style: TextStyle(fontSize: 18, color: AppTheme.textPrimary),
+          ),
         ],
       ),
     );
