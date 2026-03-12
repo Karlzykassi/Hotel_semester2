@@ -14,13 +14,14 @@ class SectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
           title,
           style: const TextStyle(
             color: AppTheme.primary,
             fontWeight: FontWeight.w700,
-            fontSize: 38,
+            fontSize: 28,
           ),
         ),
         const Spacer(),

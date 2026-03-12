@@ -1,5 +1,7 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:hote_v2/core/theme/app_theme.dart';
+import 'package:hote_v2/features/auth/login_screen.dart';
+import 'package:hote_v2/features/auth/register_screen.dart';
 import 'package:hote_v2/features/booking/booking_date_screen.dart';
 import 'package:hote_v2/features/booking/booking_screen.dart';
 import 'package:hote_v2/features/booking/cancel_booking_screen.dart';
@@ -23,6 +25,8 @@ class KhmerHotelApp extends StatelessWidget {
       theme: AppTheme.light,
       home: const OnboardingScreen(),
       routes: {
+        LoginScreen.routeName: (_) => const LoginScreen(),
+        RegisterScreen.routeName: (_) => const RegisterScreen(),
         MainShellScreen.routeName: (_) => const MainShellScreen(),
         BookingScreen.routeName: (_) => const BookingScreen(),
         ReservationFormScreen.routeName: (_) => const ReservationFormScreen(),

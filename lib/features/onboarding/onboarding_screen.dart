@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hote_v2/core/constants/app_assets.dart';
 import 'package:hote_v2/core/theme/app_theme.dart';
+import 'package:hote_v2/features/auth/login_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -19,6 +20,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       duration: const Duration(milliseconds: 250),
       curve: Curves.easeInOut,
     );
+  }
+
+  void _handleBottomAction() {
+    if (_page < 2) {
+      _goToPage(_page + 1);
+      return;
+    }
+
+    Navigator.pushReplacementNamed(context, LoginScreen.routeName);
   }
 
   @override
@@ -48,28 +58,30 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ),
               ],
             ),
-            if (_page < 2)
-              Positioned(
-                right: 24,
-                bottom: 44,
-                child: InkWell(
-                  onTap: () => _goToPage(_page + 1),
-                  borderRadius: BorderRadius.circular(40),
-                  child: Container(
-                    width: 100,
-                    height: 62,
-                    decoration: const BoxDecoration(
-                      color: AppTheme.primary,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.chevron_right_rounded,
-                      color: Colors.white,
-                      size: 50,
+            Positioned(
+              right: 24,
+              bottom: 44,
+              child: SizedBox(
+                width: 100,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: _handleBottomAction,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primary,
+                    shape: const StadiumBorder(),
+                    padding: EdgeInsets.zero,
+                  ),
+                  child: Center(
+                    child: Image.asset(
+                      AppAssets.rightNav,
+                      width: 28,
+                      height: 28,
+                      fit: BoxFit.contain,
                     ),
                   ),
                 ),
               ),
+            ),
             Positioned(
               left: 0,
               right: 0,
@@ -124,26 +136,9 @@ class _IntroLogoPage extends StatelessWidget {
           Center(
             child: Column(
               children: [
-                Image.asset(AppAssets.logo, width: 200, fit: BoxFit.contain),
-                const SizedBox(height: 18),
-                const Text(
-                  'KHMER HOTEL',
-                  style: TextStyle(
-                    color: AppTheme.primary,
-                    fontSize: 42,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.6,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                const Text(
-                  'GOOD OF SERVICE',
-                  style: TextStyle(
-                    color: Color(0xFFBC7A44),
-                    fontSize: 16,
-                    letterSpacing: 5,
-                  ),
-                ),
+                Center(
+                    child: Image.asset(AppAssets.logo,
+                        width: 350, fit: BoxFit.contain)),
               ],
             ),
           ),
@@ -219,7 +214,7 @@ class _IntroIllustrationPageThree extends StatelessWidget {
           const SizedBox(height: 16),
           Center(
             child: Image.asset(AppAssets.onboardingIllustration3,
-                fit: BoxFit.contain, width: double.infinity),
+                fit: BoxFit.contain, width: 500),
           ),
           const SizedBox(height: 28),
           const Text(

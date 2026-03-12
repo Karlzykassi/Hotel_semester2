@@ -52,7 +52,12 @@ class BookingCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
         boxShadow: const [
-          BoxShadow(color: Color(0x22000000), blurRadius: 6, offset: Offset(0, 2)),
+          BoxShadow(
+            color: Color(0x29000000),
+            blurRadius: 14,
+            offset: Offset(0, 6),
+            spreadRadius: 0.3,
+          ),
         ],
       ),
       child: Column(
@@ -95,7 +100,8 @@ class BookingCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
                         color: const Color(0xFFE9E7E7),
                         borderRadius: BorderRadius.circular(4),
@@ -112,7 +118,8 @@ class BookingCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.bookmark_border_rounded, color: AppTheme.primary),
+              const Icon(Icons.bookmark_border_rounded,
+                  color: AppTheme.primary),
             ],
           ),
           if (item.status == BookingStatus.ongoing)
@@ -148,8 +155,12 @@ class BookingCard extends StatelessWidget {
               child: Row(
                 children: [
                   Icon(
-                    item.status == BookingStatus.complete ? Icons.check_box : Icons.close,
-                    color: item.status == BookingStatus.complete ? Colors.green : Colors.red,
+                    item.status == BookingStatus.complete
+                        ? Icons.check_box
+                        : Icons.close,
+                    color: item.status == BookingStatus.complete
+                        ? Colors.green
+                        : Colors.red,
                     size: 18,
                   ),
                   const SizedBox(width: 8),
@@ -157,7 +168,9 @@ class BookingCard extends StatelessWidget {
                     child: Text(
                       bottomMessage,
                       style: TextStyle(
-                        color: item.status == BookingStatus.complete ? Colors.green : Colors.red,
+                        color: item.status == BookingStatus.complete
+                            ? Colors.green
+                            : Colors.red,
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                       ),

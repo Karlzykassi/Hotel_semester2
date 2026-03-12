@@ -6,13 +6,51 @@ class DestinationCard extends StatelessWidget {
     required this.city,
     required this.properties,
     required this.color,
+    this.imageUrl,
     this.onTap,
   });
 
   final String city;
   final int properties;
   final Color color;
+  final String? imageUrl;
   final VoidCallback? onTap;
+
+  static const double _cardWidth = 360;
+  static const double _cardHeight = 180;
+  static const List<BoxShadow> _floatingShadow = [
+    BoxShadow(
+      color: Color(0x1A000000),
+      blurRadius: 4,
+      offset: Offset(0, 0),
+    ),
+  ];
+
+  Widget _buildCardImage() {
+    final String? source = imageUrl;
+    if (source == null || source.trim().isEmpty) {
+      return Container(color: color);
+    }
+
+    final Uri? uri = Uri.tryParse(source);
+    final bool isNetworkImage = uri != null &&
+        uri.hasScheme &&
+        (uri.scheme == 'http' || uri.scheme == 'https');
+
+    if (isNetworkImage) {
+      return Image.network(
+        source,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => Container(color: color),
+      );
+    }
+
+    return Image.asset(
+      source,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) => Container(color: color),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,30 +58,68 @@ class DestinationCard extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
       child: Container(
-        width: 300,
-        padding: const EdgeInsets.all(16),
+        width: _cardWidth,
+        height: _cardHeight,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              color,
-              color.withValues(alpha: 0.65),
-            ],
-          ),
+          border: Border.all(color: const Color(0x22000000), width: 0.8),
+          boxShadow: _floatingShadow,
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        clipBehavior: Clip.antiAlias,
+        child: Stack(
+          fit: StackFit.expand,
           children: [
-            Text(
-              city,
-              style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w700),
+            Container(color: color),
+            _buildCardImage(),
+            const DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0x1A000000),
+                    Color(0x22000000),
+                    Color(0xA6000000),
+                  ],
+                ),
+              ),
             ),
-            Text(
-              '$properties Properties',
-              style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
+            Positioned(
+              left: 14,
+              right: 14,
+              bottom: 12,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    city,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w800,
+                      shadows: [
+                        Shadow(color: Color(0xA6000000), blurRadius: 6),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '$properties Properties',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      shadows: [
+                        Shadow(color: Color(0xA6000000), blurRadius: 6),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),

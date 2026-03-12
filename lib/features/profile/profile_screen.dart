@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:hote_v2/features/onboarding/onboarding_screen.dart';
 import 'package:hote_v2/shared/components/primary_button.dart';
 
@@ -33,18 +33,28 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 28),
-              const _InfoTile(title: 'Email', value: 'example@khmerhotel.com', icon: Icons.email_outlined),
+              const _InfoTile(
+                  title: 'Email',
+                  value: 'example@khmerhotel.com',
+                  icon: Icons.email_outlined),
               const SizedBox(height: 10),
-              const _InfoTile(title: 'Phone', value: '+855 12 345 678', icon: Icons.phone_outlined),
+              const _InfoTile(
+                  title: 'Phone',
+                  value: '+855 12 345 678',
+                  icon: Icons.phone_outlined),
               const SizedBox(height: 10),
-              const _InfoTile(title: 'Location', value: 'Phnom Penh, Cambodia', icon: Icons.location_on_outlined),
+              const _InfoTile(
+                  title: 'Location',
+                  value: 'Phnom Penh, Cambodia',
+                  icon: Icons.location_on_outlined),
               const Spacer(),
               PrimaryButton(
                 label: 'Logout',
                 onPressed: () {
                   Navigator.pushAndRemoveUntil(
                     context,
-                    MaterialPageRoute<void>(builder: (_) => const OnboardingScreen()),
+                    MaterialPageRoute<void>(
+                        builder: (_) => const OnboardingScreen()),
                     (route) => false,
                   );
                 },
@@ -58,7 +68,8 @@ class ProfileScreen extends StatelessWidget {
 }
 
 class _InfoTile extends StatelessWidget {
-  const _InfoTile({required this.title, required this.value, required this.icon});
+  const _InfoTile(
+      {required this.title, required this.value, required this.icon});
 
   final String title;
   final String value;
@@ -72,7 +83,12 @@ class _InfoTile extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: const [
-          BoxShadow(color: Color(0x22000000), blurRadius: 6, offset: Offset(0, 2)),
+          BoxShadow(
+            color: Color(0x29000000),
+            blurRadius: 14,
+            offset: Offset(0, 6),
+            spreadRadius: 0.3,
+          ),
         ],
       ),
       child: Row(
@@ -83,9 +99,12 @@ class _InfoTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontSize: 14, color: Colors.grey)),
+                Text(title,
+                    style: const TextStyle(fontSize: 14, color: Colors.grey)),
                 const SizedBox(height: 2),
-                Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                Text(value,
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.w600)),
               ],
             ),
           ),
