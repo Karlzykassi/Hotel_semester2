@@ -2,21 +2,40 @@ import 'package:flutter/material.dart';
 import 'package:hote_v2/core/constants/app_assets.dart';
 import 'package:hote_v2/core/theme/app_theme.dart';
 import 'package:hote_v2/data/mock/app_data.dart';
+import 'package:hote_v2/data/models/booking_flow_data.dart';
+import 'package:hote_v2/data/models/hotel_item.dart';
+import 'package:hote_v2/data/models/search_result_item.dart';
+import 'package:hote_v2/features/booking/hotel_details_screen.dart';
 import 'package:hote_v2/features/booking/reservation_form_screen.dart';
-import 'package:hote_v2/features/home/map_screen.dart';
+import 'package:hote_v2/features/search/search_results_screen.dart';
 import 'package:hote_v2/shared/components/destination_card.dart';
 import 'package:hote_v2/shared/components/hotel_card.dart';
 import 'package:hote_v2/shared/components/kh_search_bar.dart';
 import 'package:hote_v2/shared/components/section_title.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, this.onSearchTap});
 
   static const _headerRadius = Radius.circular(28);
+  final VoidCallback? onSearchTap;
+
+  BookingFlowData _bookingFlowFromHotel(HotelItem hotel) {
+    return BookingFlowData.fromResult(
+      SearchResultItem(
+        name: hotel.name,
+        city: hotel.city,
+        rating: hotel.rating,
+        price: 300,
+        imageColor: hotel.imageColor,
+        imageUrl: hotel.imageUrl,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
@@ -38,9 +57,7 @@ class HomeScreen extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 14),
                       child: KhSearchBar(
                         hint: 'Phnom Penh',
-                        onTap: () {
-                          Navigator.pushNamed(context, MapScreen.routeName);
-                        },
+                        onTap: onSearchTap,
                       ),
                     ),
                     const SizedBox(height: 14),
@@ -58,9 +75,12 @@ class HomeScreen extends StatelessWidget {
                           final hotel = AppData.popularHotels[index];
                           return HotelCard(
                             hotel: hotel,
-                            onTap: () => Navigator.pushNamed(
-                              context,
-                              ReservationFormScreen.routeName,
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (_) => HotelDetailsScreen(
+                                  bookingFlow: _bookingFlowFromHotel(hotel),
+                                ),
+                              ),
                             ),
                           );
                         },
@@ -86,9 +106,12 @@ class HomeScreen extends StatelessWidget {
                             properties: destination.properties,
                             color: Color(destination.imageColor),
                             imageUrl: destination.imageUrl,
-                            onTap: () => Navigator.pushNamed(
-                              context,
-                              ReservationFormScreen.routeName,
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (_) => SearchResultsScreen(
+                                  initialCity: destination.name,
+                                ),
+                              ),
                             ),
                           );
                         },
@@ -109,6 +132,18 @@ class HomeScreen extends StatelessWidget {
                         color: const Color(0xFFFFB171),
                         borderRadius: BorderRadius.circular(18),
                         border: Border.all(color: AppTheme.primary),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0x24000000),
+                            blurRadius: 18,
+                            offset: Offset(0, 8),
+                          ),
+                          BoxShadow(
+                            color: Color(0x12000000),
+                            blurRadius: 6,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -213,7 +248,7 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildHelloHeader() {
     return Container(
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.fromLTRB(30, 0, 10, 0),
       alignment: Alignment.centerLeft,
       decoration: const BoxDecoration(
         color: AppTheme.primary,

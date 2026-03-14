@@ -20,9 +20,14 @@ class DestinationCard extends StatelessWidget {
   static const double _cardHeight = 180;
   static const List<BoxShadow> _floatingShadow = [
     BoxShadow(
-      color: Color(0x1A000000),
-      blurRadius: 4,
-      offset: Offset(0, 0),
+      color: Color(0x24000000),
+      blurRadius: 18,
+      offset: Offset(0, 8),
+    ),
+    BoxShadow(
+      color: Color(0x12000000),
+      blurRadius: 6,
+      offset: Offset(0, 2),
     ),
   ];
 

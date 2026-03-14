@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:hote_v2/core/theme/app_theme.dart';
 import 'package:hote_v2/features/booking/booking_screen.dart';
 import 'package:hote_v2/features/home/home_screen.dart';
@@ -6,23 +6,37 @@ import 'package:hote_v2/features/profile/profile_screen.dart';
 import 'package:hote_v2/features/search/search_screen.dart';
 
 class MainShellScreen extends StatefulWidget {
-  const MainShellScreen({super.key});
+  const MainShellScreen({
+    super.key,
+    this.initialIndex = 0,
+  });
 
   static const routeName = '/shell';
+  final int initialIndex;
 
   @override
   State<MainShellScreen> createState() => _MainShellScreenState();
 }
 
 class _MainShellScreenState extends State<MainShellScreen> {
-  int _index = 0;
+  late int _index;
 
-  static const _screens = <Widget>[
-    HomeScreen(),
-    SearchScreen(),
-    BookingScreen(),
-    ProfileScreen(),
-  ];
+  List<Widget> get _screens => <Widget>[
+        HomeScreen(onSearchTap: _openSearch),
+        const SearchScreen(),
+        const BookingScreen(),
+        const ProfileScreen(),
+      ];
+
+  void _openSearch() {
+    setState(() => _index = 1);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _index = widget.initialIndex;
+  }
 
   @override
   Widget build(BuildContext context) {

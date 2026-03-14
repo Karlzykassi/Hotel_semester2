@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 class KhSearchBar extends StatelessWidget {
   const KhSearchBar({
@@ -6,23 +6,26 @@ class KhSearchBar extends StatelessWidget {
     required this.hint,
     this.onTap,
     this.controller,
+    this.readOnly = false,
   });
 
   final String hint;
   final VoidCallback? onTap;
   final TextEditingController? controller;
+  final bool readOnly;
 
   @override
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
-      readOnly: onTap != null,
+      readOnly: readOnly || onTap != null,
       onTap: onTap,
       decoration: InputDecoration(
         hintText: hint,
         prefixIcon: const Icon(Icons.search),
         isDense: true,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       ),
     );
   }

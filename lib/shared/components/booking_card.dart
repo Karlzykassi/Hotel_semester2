@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hote_v2/core/constants/app_assets.dart';
 import 'package:hote_v2/core/theme/app_theme.dart';
 import 'package:hote_v2/data/models/booking_item.dart';
 import 'package:hote_v2/shared/components/primary_button.dart';
@@ -68,17 +69,10 @@ class BookingCard extends StatelessWidget {
               Container(
                 width: 110,
                 height: 96,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Color(item.imageColor),
-                      Color(item.imageColor).withValues(alpha: 0.72),
-                    ],
-                  ),
-                ),
+                clipBehavior: Clip.antiAlias,
+                decoration:
+                    BoxDecoration(borderRadius: BorderRadius.circular(16)),
+                child: Image.asset(AppAssets.hotel1, fit: BoxFit.cover),
               ),
               const SizedBox(width: 10),
               Expanded(

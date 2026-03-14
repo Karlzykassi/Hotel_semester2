@@ -1,7 +1,8 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:hote_v2/core/theme/app_theme.dart';
 import 'package:hote_v2/data/mock/app_data.dart';
 import 'package:hote_v2/features/home/map_screen.dart';
+import 'package:hote_v2/features/search/search_results_screen.dart';
 import 'package:hote_v2/shared/components/kh_search_bar.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -12,7 +13,8 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
-  final TextEditingController _searchController = TextEditingController(text: 'Phnom Penh');
+  final TextEditingController _searchController =
+      TextEditingController(text: 'Phnom Penh');
 
   @override
   void dispose() {
@@ -36,11 +38,21 @@ class _SearchScreenState extends State<SearchScreen> {
                 runSpacing: 8,
                 children: AppData.cities.map((city) {
                   return OutlinedButton(
-                    onPressed: () => _searchController.text = city,
+                    onPressed: () {
+                      _searchController.text = city;
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => SearchResultsScreen(
+                            initialCity: city,
+                          ),
+                        ),
+                      );
+                    },
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppTheme.primary,
                       side: const BorderSide(color: AppTheme.primary),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20)),
                     ),
                     child: Text(city, style: const TextStyle(fontSize: 16)),
                   );
@@ -63,10 +75,14 @@ class _SearchScreenState extends State<SearchScreen> {
                         Expanded(
                           child: Text(
                             AppData.searchHistory[index],
-                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                            style: const TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.w600),
                           ),
                         ),
-                        IconButton(onPressed: () {}, icon: const Icon(Icons.cancel_outlined, color: Colors.grey)),
+                        IconButton(
+                            onPressed: () {},
+                            icon: const Icon(Icons.cancel_outlined,
+                                color: Colors.grey)),
                       ],
                     );
                   },
@@ -76,15 +92,19 @@ class _SearchScreenState extends State<SearchScreen> {
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
-                  onPressed: () => Navigator.pushNamed(context, MapScreen.routeName),
+                  onPressed: () =>
+                      Navigator.pushNamed(context, MapScreen.routeName),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppTheme.primary,
                     side: const BorderSide(color: AppTheme.primary),
                     minimumSize: const Size.fromHeight(54),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
                   ),
                   icon: const Icon(Icons.map_outlined),
-                  label: const Text('Open Map', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                  label: const Text('Open Map',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                 ),
               ),
             ],

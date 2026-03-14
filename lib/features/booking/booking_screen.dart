@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:hote_v2/core/theme/app_theme.dart';
 import 'package:hote_v2/data/mock/app_data.dart';
 import 'package:hote_v2/data/models/booking_item.dart';
@@ -39,19 +39,16 @@ class _BookingScreenState extends State<BookingScreen> {
           hotelName: 'Rosewood Phnom Penh',
           city: 'Phnom Penh',
           status: BookingStatus.ongoing,
-          imageColor: 0xFFA1826F,
         ),
         BookingItem(
           hotelName: 'Raffles Hotel Le Royal',
           city: 'Phnom Penh',
           status: BookingStatus.ongoing,
-          imageColor: 0xFF9E8A77,
         ),
         BookingItem(
           hotelName: 'Sofitel Phnom Penh Phokeethra',
           city: 'Phnom Penh',
           status: BookingStatus.ongoing,
-          imageColor: 0xFFB9A792,
         ),
       ];
     }
@@ -62,7 +59,6 @@ class _BookingScreenState extends State<BookingScreen> {
             hotelName: item.hotelName,
             city: item.city,
             status: _status,
-            imageColor: item.imageColor,
           ),
         )
         .toList(growable: false);
@@ -74,7 +70,8 @@ class _BookingScreenState extends State<BookingScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Booking', style: TextStyle(fontSize: 32, fontWeight: FontWeight.w700)),
+        title: const Text('Booking',
+            style: TextStyle(fontSize: 32, fontWeight: FontWeight.w700)),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -88,19 +85,22 @@ class _BookingScreenState extends State<BookingScreen> {
                   StatusChip(
                     label: _label(BookingStatus.ongoing),
                     selected: _status == BookingStatus.ongoing,
-                    onTap: () => setState(() => _status = BookingStatus.ongoing),
+                    onTap: () =>
+                        setState(() => _status = BookingStatus.ongoing),
                   ),
                   const SizedBox(width: 8),
                   StatusChip(
                     label: _label(BookingStatus.complete),
                     selected: _status == BookingStatus.complete,
-                    onTap: () => setState(() => _status = BookingStatus.complete),
+                    onTap: () =>
+                        setState(() => _status = BookingStatus.complete),
                   ),
                   const SizedBox(width: 8),
                   StatusChip(
                     label: _label(BookingStatus.canceled),
                     selected: _status == BookingStatus.canceled,
-                    onTap: () => setState(() => _status = BookingStatus.canceled),
+                    onTap: () =>
+                        setState(() => _status = BookingStatus.canceled),
                   ),
                   const SizedBox(width: 8),
                   StatusChip(
@@ -120,7 +120,8 @@ class _BookingScreenState extends State<BookingScreen> {
                     item: items[index],
                     onPrimary: () {
                       if (_status == BookingStatus.ongoing) {
-                        Navigator.pushNamed(context, CancelBookingScreen.routeName);
+                        Navigator.pushNamed(
+                            context, CancelBookingScreen.routeName);
                       }
                     },
                     onSecondary: () {
