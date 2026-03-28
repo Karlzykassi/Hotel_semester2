@@ -32,17 +32,21 @@ class BookingFlowData {
   final String roomType;
 
   factory BookingFlowData.fromResult(SearchResultItem hotel) {
+    final DateTime today = DateTime.now();
+    final DateTime checkIn = DateTime(today.year, today.month, today.day);
+    final DateTime checkOut = checkIn.add(const Duration(days: 1));
+
     return BookingFlowData(
       hotel: hotel,
-      checkIn: DateTime(2025, 8, 17),
-      checkOut: DateTime(2025, 8, 19),
-      guests: 3,
+      checkIn: checkIn,
+      checkOut: checkOut,
+      guests: 1,
       title: 'Mr.',
-      firstName: 'Leonel Andres',
-      lastName: 'Messi',
-      dateOfBirth: '24 June 1987',
-      email: 'guest@khmerhotel.com',
-      phoneNumber: '011 111 111',
+      firstName: '',
+      lastName: '',
+      dateOfBirth: '',
+      email: '',
+      phoneNumber: '',
       paymentMethod: 'ABA',
       cardLabel: '.... ........ 4672',
       roomType: 'Family Room',

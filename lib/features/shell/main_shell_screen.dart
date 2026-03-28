@@ -20,16 +20,23 @@ class MainShellScreen extends StatefulWidget {
 
 class _MainShellScreenState extends State<MainShellScreen> {
   late int _index;
+  final GlobalKey<BookingScreenState> _bookingScreenKey =
+      GlobalKey<BookingScreenState>();
 
   List<Widget> get _screens => <Widget>[
         HomeScreen(onSearchTap: _openSearch),
         const SearchScreen(),
-        const BookingScreen(),
+        BookingScreen(key: _bookingScreenKey),
         const ProfileScreen(),
       ];
 
   void _openSearch() {
     setState(() => _index = 1);
+  }
+
+  void _openBookings() {
+    setState(() => _index = 2);
+    _bookingScreenKey.currentState?.refreshBookings(silent: true);
   }
 
   @override
@@ -41,40 +48,46 @@ class _MainShellScreenState extends State<MainShellScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       body: IndexedStack(index: _index, children: _screens),
-      bottomNavigationBar: Container(
-        height: 92,
-        decoration: const BoxDecoration(
-          color: AppTheme.primary,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(18),
-            topRight: Radius.circular(18),
+      bottomNavigationBar: SafeArea(
+        minimum: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
+          decoration: BoxDecoration(
+            color: AppTheme.primary,
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: AppTheme.cardShadow,
           ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _BottomItem(
-                icon: Icons.home_outlined,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: <Widget>[
+              _BottomItem(
+                icon: Icons.home_rounded,
                 label: 'Home',
                 selected: _index == 0,
-                onTap: () => setState(() => _index = 0)),
-            _BottomItem(
+                onTap: () => setState(() => _index = 0),
+              ),
+              _BottomItem(
                 icon: Icons.search_rounded,
                 label: 'Search',
                 selected: _index == 1,
-                onTap: () => setState(() => _index = 1)),
-            _BottomItem(
-                icon: Icons.wallet_membership_outlined,
+                onTap: () => setState(() => _index = 1),
+              ),
+              _BottomItem(
+                icon: Icons.calendar_month_rounded,
                 label: 'Booking',
                 selected: _index == 2,
-                onTap: () => setState(() => _index = 2)),
-            _BottomItem(
-                icon: Icons.person_outline_rounded,
+                onTap: _openBookings,
+              ),
+              _BottomItem(
+                icon: Icons.person_rounded,
                 label: 'Profile',
                 selected: _index == 3,
-                onTap: () => setState(() => _index = 3)),
-          ],
+                onTap: () => setState(() => _index = 3),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -96,24 +109,43 @@ class _BottomItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(18),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: Colors.white, size: selected ? 35 : 30),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600),
-            ),
-          ],
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOut,
+          padding: EdgeInsets.symmetric(
+            horizontal: selected ? 16 : 10,
+            vertical: 10,
+          ),
+          decoration: BoxDecoration(
+            color: selected ? const Color(0x26FFFFFF) : Colors.transparent,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Icon(
+                icon,
+                color: Colors.white,
+                size: selected ? 30 : 25,
+              ),
+              if (selected) ...<Widget>[
+                const SizedBox(width: 8),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );

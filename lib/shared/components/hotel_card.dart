@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:hote_v2/core/theme/app_theme.dart';
 import 'package:hote_v2/data/models/hotel_item.dart';
+import 'package:hote_v2/shared/components/hotel_image.dart';
 
 class HotelCard extends StatelessWidget {
   const HotelCard({
@@ -13,168 +15,193 @@ class HotelCard extends StatelessWidget {
   final VoidCallback? onTap;
   final bool showRating;
 
-  static const double _cardWidth = 360;
-  static const double _cardHeight = 180;
-  static const List<BoxShadow> _floatingShadow = [
-    BoxShadow(
-      color: Color(0x24000000),
-      blurRadius: 18,
-      offset: Offset(0, 8),
-    ),
-    BoxShadow(
-      color: Color(0x12000000),
-      blurRadius: 6,
-      offset: Offset(0, 2),
-    ),
-  ];
-
-  Widget _buildCardImage() {
-    final String? source = hotel.imageUrl;
-    if (source == null || source.trim().isEmpty) {
-      return Container(color: Color(hotel.imageColor));
-    }
-
-    final Uri? uri = Uri.tryParse(source);
-    final bool isNetworkImage = uri != null &&
-        uri.hasScheme &&
-        (uri.scheme == 'http' || uri.scheme == 'https');
-
-    if (isNetworkImage) {
-      return Image.network(
-        source,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return Container(color: Color(hotel.imageColor));
-        },
-      );
-    }
-
-    return Image.asset(
-      source,
-      fit: BoxFit.cover,
-      errorBuilder: (context, error, stackTrace) {
-        return Container(color: Color(hotel.imageColor));
-      },
-    );
-  }
+  static const double _cardWidth = 400;
+  static const double _cardHeight = 300;
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        width: _cardWidth,
-        height: _cardHeight,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: const Color(0x22000000), width: 0.8),
-          boxShadow: _floatingShadow,
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            Container(color: Color(hotel.imageColor)),
-            _buildCardImage(),
-            const DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Color(0x1A000000),
-                    Color(0x22000000),
-                    Color(0xA6000000),
-                  ],
-                ),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(28),
+        child: Container(
+          width: _cardWidth,
+          height: _cardHeight,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: AppTheme.cardShadow,
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Stack(
+            fit: StackFit.expand,
+            children: <Widget>[
+              Container(color: Color(hotel.imageColor)),
+              HotelImage(
+                source: hotel.imageUrl,
+                fallbackColor: hotel.imageColor,
               ),
-            ),
-            if (showRating)
-              Positioned(
-                top: 10,
-                right: 10,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xCC111111),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.star_rounded,
-                        size: 14,
-                        color: Color(0xFFFFB800),
-                      ),
-                      const SizedBox(width: 2),
-                      Text(
-                        hotel.rating.toStringAsFixed(1),
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Color(0xFFFFB800),
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
+              const DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: <Color>[
+                      Color(0x22000000),
+                      Color(0x12000000),
+                      Color(0xC0000000),
                     ],
                   ),
                 ),
               ),
-            Positioned(
-              left: 14,
-              right: 14,
-              bottom: 12,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    hotel.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.w800,
-                      shadows: [
-                        Shadow(color: Color(0xA6000000), blurRadius: 6),
+              Positioned(
+                top: 14,
+                left: 14,
+                child: _PillLabel(
+                  icon: Icons.location_on_rounded,
+                  label: hotel.displayProvince,
+                ),
+              ),
+              if (showRating)
+                Positioned(
+                  top: 14,
+                  right: 14,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 7,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xCC191512),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(color: const Color(0x33FFFFFF)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        const Icon(
+                          Icons.star_rounded,
+                          size: 15,
+                          color: Color(0xFFFFC44D),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          hotel.rating.toStringAsFixed(1),
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.location_on,
-                        size: 15,
-                        color: Colors.white,
-                      ),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          hotel.city,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            shadows: [
-                              Shadow(color: Color(0xA6000000), blurRadius: 6),
-                            ],
-                          ),
+                ),
+              Positioned(
+                left: 14,
+                right: 14,
+                bottom: 14,
+                child: Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: const Color(0x26FFFFFF),
+                    borderRadius: BorderRadius.circular(22),
+                    border: Border.all(color: const Color(0x33FFFFFF)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        hotel.name,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          height: 1.05,
                         ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: <Widget>[
+                          Expanded(
+                            child: Text(
+                              hotel.locationLabel,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Color(0xFFFBE9DE),
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          if (hotel.priceFrom != null && hotel.priceFrom! > 0)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Text(
+                                '\$${hotel.priceFrom}',
+                                style: const TextStyle(
+                                  color: AppTheme.textPrimary,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                     ],
                   ),
-                ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
+      ),
+    );
+  }
+}
+
+class _PillLabel extends StatelessWidget {
+  const _PillLabel({
+    required this.icon,
+    required this.label,
+  });
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color: const Color(0xB2191512),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: const Color(0x33FFFFFF)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Icon(icon, size: 14, color: Colors.white),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
       ),
     );
   }

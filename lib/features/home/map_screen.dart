@@ -68,7 +68,14 @@ class MapScreen extends StatelessWidget {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                bookingFlow!.hotel.city,
+                                (bookingFlow!.hotel.address
+                                            ?.trim()
+                                            .isNotEmpty ??
+                                        false)
+                                    ? bookingFlow!.hotel.address!.trim()
+                                    : bookingFlow!.hotel.city,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
                                   fontSize: 13,
                                   color: Colors.grey,

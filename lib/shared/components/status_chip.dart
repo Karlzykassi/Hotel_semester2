@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import 'package:hote_v2/core/theme/app_theme.dart';
 
 class StatusChip extends StatelessWidget {
   const StatusChip({
@@ -14,22 +15,30 @@ class StatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 7),
-        decoration: BoxDecoration(
-          color: selected ? const Color(0xFFFF6E00) : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: const Color(0xFFFF6E00)),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: selected ? Colors.white : const Color(0xFFFF6E00),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(999),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOut,
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+          decoration: BoxDecoration(
+            color: selected ? AppTheme.primary : AppTheme.surface,
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(
+              color: selected ? AppTheme.primary : AppTheme.border,
+            ),
+            boxShadow: selected ? AppTheme.buttonShadow : const <BoxShadow>[],
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: selected ? Colors.white : AppTheme.textSecondary,
+            ),
           ),
         ),
       ),

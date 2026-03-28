@@ -1,0 +1,18 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Khmer Hotel (Mock Data)",
+      "request": "launch",
+      "type": "dart"
+    },
+    {
+      "name": "Khmer Hotel (Supabase)",
+      "request": "launch",
+      "type": "dart",
+      "args": [
+        "--dart-define-from-file=supabase/supabase_keys.json"
+      ]
+    }
+  ]
+}

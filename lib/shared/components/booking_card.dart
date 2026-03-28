@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hote_v2/core/constants/app_assets.dart';
 import 'package:hote_v2/core/theme/app_theme.dart';
 import 'package:hote_v2/data/models/booking_item.dart';
+import 'package:hote_v2/shared/components/hotel_image.dart';
 import 'package:hote_v2/shared/components/primary_button.dart';
 
 class BookingCard extends StatelessWidget {
@@ -19,158 +20,199 @@ class BookingCard extends StatelessWidget {
   String _badgeText() {
     switch (item.status) {
       case BookingStatus.ongoing:
-        return 'Paid';
+        return 'Upcoming';
       case BookingStatus.complete:
-        return 'Complete';
+        return 'Completed';
       case BookingStatus.canceled:
-        return 'Cancel & Refund';
+        return 'Canceled';
       case BookingStatus.saved:
-        return 'View';
+        return 'Saved';
+    }
+  }
+
+  Color _badgeColor() {
+    switch (item.status) {
+      case BookingStatus.ongoing:
+        return AppTheme.primary;
+      case BookingStatus.complete:
+        return AppTheme.success;
+      case BookingStatus.canceled:
+        return AppTheme.danger;
+      case BookingStatus.saved:
+        return AppTheme.secondary;
     }
   }
 
   String _bottomMessage() {
     switch (item.status) {
       case BookingStatus.ongoing:
-        return '';
+        return 'Everything is ready for your stay.';
       case BookingStatus.complete:
-        return 'Yeay, You have Complete it!';
+        return 'This stay has been completed successfully.';
       case BookingStatus.canceled:
-        return 'You Canceled this hotel Booking';
+        return 'This booking has already been canceled.';
       case BookingStatus.saved:
-        return '';
+        return 'Saved for later review.';
     }
+  }
+
+  Widget _buildHotelImage() {
+    return HotelImage(
+      source: item.bookingFlow?.hotel.imageUrl,
+      fallbackColor: item.bookingFlow?.hotel.imageColor ?? 0xFFC5AE95,
+      fit: BoxFit.cover,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final bottomMessage = _bottomMessage();
+    final Color badgeColor = _badgeColor();
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x29000000),
-            blurRadius: 14,
-            offset: Offset(0, 6),
-            spreadRadius: 0.3,
-          ),
-        ],
+        color: AppTheme.surface,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppTheme.border),
+        boxShadow: AppTheme.cardShadow,
       ),
       child: Column(
-        children: [
+        children: <Widget>[
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+            children: <Widget>[
               Container(
-                width: 110,
-                height: 96,
+                width: 106,
+                height: 112,
                 clipBehavior: Clip.antiAlias,
-                decoration:
-                    BoxDecoration(borderRadius: BorderRadius.circular(16)),
-                child: Image.asset(AppAssets.hotel1, fit: BoxFit.cover),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: item.bookingFlow == null
+                    ? Image.asset(AppAssets.hotel1, fit: BoxFit.cover)
+                    : _buildHotelImage(),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item.hotelName,
-                      style: const TextStyle(
-                        color: AppTheme.primary,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      item.city,
-                      style: const TextStyle(color: Colors.grey, fontSize: 16),
-                    ),
-                    const SizedBox(height: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE9E7E7),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        _badgeText(),
-                        style: const TextStyle(
-                          color: AppTheme.primary,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
+                  children: <Widget>[
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Expanded(
+                          child: Text(
+                            item.hotelName,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: AppTheme.textPrimary,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                              height: 1.1,
+                            ),
+                          ),
                         ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: badgeColor.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            _badgeText(),
+                            style: TextStyle(
+                              color: badgeColor,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: <Widget>[
+                        const Icon(
+                          Icons.location_on_rounded,
+                          size: 16,
+                          color: AppTheme.textMuted,
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            item.city,
+                            style: const TextStyle(
+                              color: AppTheme.textSecondary,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      _bottomMessage(),
+                      style: const TextStyle(
+                        color: AppTheme.textSecondary,
+                        fontSize: 13,
+                        height: 1.35,
                       ),
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.bookmark_border_rounded,
-                  color: AppTheme.primary),
             ],
           ),
+          const SizedBox(height: 14),
           if (item.status == BookingStatus.ongoing)
-            Padding(
-              padding: const EdgeInsets.only(top: 12),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: PrimaryButton(
-                      label: 'Canceled Booking',
-                      onPressed: onPrimary,
-                      height: 42,
-                      fontSize: 14,
-                      radius: 20,
-                    ),
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: onPrimary,
+                    child: const Text('Cancel'),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: PrimaryButton(
-                      label: 'View Ticket',
-                      onPressed: onSecondary ?? onPrimary,
-                      height: 42,
-                      fontSize: 14,
-                      radius: 20,
-                    ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: PrimaryButton(
+                    label: 'View Ticket',
+                    onPressed: onSecondary ?? onPrimary,
+                    height: 48,
+                    fontSize: 14,
+                    radius: 18,
                   ),
-                ],
-              ),
+                ),
+              ],
             )
-          else if (bottomMessage.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 12),
-              child: Row(
-                children: [
-                  Icon(
-                    item.status == BookingStatus.complete
-                        ? Icons.check_box
-                        : Icons.close,
-                    color: item.status == BookingStatus.complete
-                        ? Colors.green
-                        : Colors.red,
-                    size: 18,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      bottomMessage,
-                      style: TextStyle(
-                        color: item.status == BookingStatus.complete
-                            ? Colors.green
-                            : Colors.red,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ],
+          else
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: onSecondary,
+                icon: Icon(
+                  item.status == BookingStatus.complete
+                      ? Icons.check_circle_rounded
+                      : item.status == BookingStatus.canceled
+                          ? Icons.block_rounded
+                          : Icons.bookmark_rounded,
+                  size: 18,
+                  color: badgeColor,
+                ),
+                label: Text(
+                  item.status == BookingStatus.complete
+                      ? 'Completed Stay'
+                      : item.status == BookingStatus.canceled
+                          ? 'Canceled Booking'
+                          : 'Saved Booking',
+                  style: TextStyle(color: badgeColor),
+                ),
               ),
             ),
         ],

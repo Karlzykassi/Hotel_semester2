@@ -5,6 +5,7 @@ import 'package:hote_v2/data/models/booking_flow_data.dart';
 import 'package:hote_v2/data/models/search_result_item.dart';
 import 'package:hote_v2/features/booking/booking_date_screen.dart';
 import 'package:hote_v2/features/home/map_screen.dart';
+import 'package:hote_v2/shared/components/hotel_image.dart';
 import 'package:hote_v2/shared/components/primary_button.dart';
 
 class HotelDetailsScreen extends StatelessWidget {
@@ -18,6 +19,9 @@ class HotelDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hotel = bookingFlow.hotel;
+    final String locationLabel = (hotel.address?.trim().isNotEmpty ?? false)
+        ? hotel.address!.trim()
+        : '${hotel.city}, Cambodia';
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -54,7 +58,7 @@ class HotelDetailsScreen extends StatelessWidget {
                               const SizedBox(width: 4),
                               Expanded(
                                 child: Text(
-                                  '${hotel.city}, Cambodia',
+                                  locationLabel,
                                   style: const TextStyle(
                                     fontSize: 18,
                                     color: AppTheme.textSecondary,
@@ -235,36 +239,6 @@ class _DetailImageSection extends StatelessWidget {
 
   final SearchResultItem hotel;
 
-  Widget _buildImage() {
-    final source = hotel.imageUrl;
-    if (source == null || source.trim().isEmpty) {
-      return Container(color: Color(hotel.imageColor));
-    }
-
-    final uri = Uri.tryParse(source);
-    final isNetworkImage = uri != null &&
-        uri.hasScheme &&
-        (uri.scheme == 'http' || uri.scheme == 'https');
-
-    if (isNetworkImage) {
-      return Image.network(
-        source,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return Container(color: Color(hotel.imageColor));
-        },
-      );
-    }
-
-    return Image.asset(
-      source,
-      fit: BoxFit.cover,
-      errorBuilder: (context, error, stackTrace) {
-        return Container(color: Color(hotel.imageColor));
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
@@ -277,7 +251,10 @@ class _DetailImageSection extends StatelessWidget {
           SizedBox(
             height: 260,
             width: double.infinity,
-            child: _buildImage(),
+            child: HotelImage(
+              source: hotel.imageUrl,
+              fallbackColor: hotel.imageColor,
+            ),
           ),
           const Positioned.fill(
             child: DecoratedBox(

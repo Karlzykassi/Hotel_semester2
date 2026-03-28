@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:hote_v2/core/services/app_services.dart';
 import 'package:hote_v2/core/theme/app_theme.dart';
-import 'package:hote_v2/data/mock/app_data.dart';
 import 'package:hote_v2/data/models/booking_flow_data.dart';
 import 'package:hote_v2/data/models/search_result_item.dart';
 import 'package:hote_v2/features/booking/hotel_details_screen.dart';
 import 'package:hote_v2/features/shell/main_shell_screen.dart';
+import 'package:hote_v2/shared/components/hotel_image.dart';
 import 'package:hote_v2/shared/components/kh_search_bar.dart';
 
 class SearchResultsScreen extends StatefulWidget {
   const SearchResultsScreen({
     super.key,
-    required this.initialCity,
+    this.initialCity,
+    this.initialQuery,
   });
 
-  final String initialCity;
+  final String? initialCity;
+  final String? initialQuery;
 
   @override
   State<SearchResultsScreen> createState() => _SearchResultsScreenState();
@@ -22,18 +25,21 @@ class SearchResultsScreen extends StatefulWidget {
 class _SearchResultsScreenState extends State<SearchResultsScreen> {
   late final TextEditingController _searchController;
 
-  String get _selectedCity => widget.initialCity;
+  List<String> _provinces = const <String>[];
+  List<SearchResultItem> _results = const <SearchResultItem>[];
+  bool _isLoading = true;
+  String? _selectedProvince;
 
-  List<SearchResultItem> get _results =>
-      AppData.searchResultsByCity[_selectedCity] ?? const <SearchResultItem>[];
-
-  int get _resultCount =>
-      AppData.searchResultCounts[_selectedCity] ?? _results.length;
+  String get _provinceQuery => _searchController.text.trim();
+  int get _resultCount => _results.length;
 
   @override
   void initState() {
     super.initState();
-    _searchController = TextEditingController(text: _selectedCity);
+    _selectedProvince =
+        _normalize(widget.initialCity) ?? _normalize(widget.initialQuery);
+    _searchController = TextEditingController(text: _selectedProvince ?? '');
+    _loadResults(saveSearch: false);
   }
 
   @override
@@ -42,16 +48,102 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     super.dispose();
   }
 
-  void _openCity(String city) {
-    if (city == _selectedCity) {
+  String? _normalize(String? value) {
+    final String trimmed = value?.trim() ?? '';
+    return trimmed.isEmpty ? null : trimmed;
+  }
+
+  Future<void> _loadResults({bool saveSearch = true}) async {
+    if (mounted) {
+      setState(() => _isLoading = true);
+    }
+
+    final String? province = _selectedProvince;
+
+    if (saveSearch && province != null) {
+      await AppServices.hotels.saveSearch(province, city: province);
+    }
+
+    final List<String> provinces = await AppServices.hotels.fetchCities();
+    final List<SearchResultItem> results =
+        await AppServices.hotels.searchHotels(
+      city: province,
+    );
+    if (!mounted) {
       return;
     }
 
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(
-        builder: (_) => SearchResultsScreen(initialCity: city),
-      ),
-    );
+    setState(() {
+      _provinces = provinces;
+      _results = results;
+      _isLoading = false;
+    });
+  }
+
+  String? _matchingProvince(String rawValue) {
+    final String normalized = _normalize(rawValue) ?? '';
+    if (normalized.isEmpty) {
+      return null;
+    }
+
+    for (final String province in _provinces) {
+      if (province.toLowerCase() == normalized.toLowerCase()) {
+        return province;
+      }
+    }
+
+    final List<String> partialMatches = _provinces
+        .where(
+          (String province) =>
+              province.toLowerCase().contains(normalized.toLowerCase()),
+        )
+        .toList(growable: false);
+    if (partialMatches.length == 1) {
+      return partialMatches.first;
+    }
+    return null;
+  }
+
+  void _openProvince(String? province) {
+    if (province == _selectedProvince) {
+      return;
+    }
+
+    setState(() {
+      _selectedProvince = province;
+      _searchController.text = province ?? '';
+    });
+    _loadResults();
+  }
+
+  void _submitSearch(String value) {
+    final String? province = _matchingProvince(value);
+    if (province == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Search by a Cambodian province name only.'),
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _selectedProvince = province;
+      _searchController.text = province;
+    });
+    _loadResults();
+  }
+
+  void _clearSearch() {
+    if (_provinceQuery.isEmpty && _selectedProvince == null) {
+      return;
+    }
+
+    setState(() {
+      _selectedProvince = null;
+      _searchController.clear();
+    });
+    _loadResults();
   }
 
   void _openShellTab(int index) {
@@ -59,136 +151,205 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
       MaterialPageRoute<void>(
         builder: (_) => MainShellScreen(initialIndex: index),
       ),
-      (route) => false,
+      (Route<dynamic> route) => false,
     );
+  }
+
+  String _resultHeading() {
+    if (_selectedProvince != null) {
+      return 'Hotels in $_selectedProvince';
+    }
+    return 'All Hotels by Province';
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.background,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(14, 14, 14, 0),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              KhSearchBar(
-                hint: _selectedCity,
-                controller: _searchController,
-                readOnly: true,
+            children: <Widget>[
+              Row(
+                children: <Widget>[
+                  Expanded(
+                    child: KhSearchBar(
+                      hint: 'Search province in Cambodia',
+                      controller: _searchController,
+                      onSubmitted: (String value) => _submitSearch(value),
+                    ),
+                  ),
+                  if (_provinceQuery.isNotEmpty ||
+                      _selectedProvince != null) ...<Widget>[
+                    const SizedBox(width: 8),
+                    IconButton(
+                      onPressed: _clearSearch,
+                      icon: const Icon(Icons.close_rounded),
+                      tooltip: 'Clear search',
+                    ),
+                  ],
+                ],
               ),
-              const SizedBox(height: 16),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: AppData.cities.map((city) {
-                    final isSelected = city == _selectedCity;
-
-                    return Padding(
-                      padding: EdgeInsets.only(
-                        right: city == AppData.cities.last ? 0 : 8,
-                      ),
-                      child: OutlinedButton(
-                        onPressed: () => _openCity(city),
-                        style: OutlinedButton.styleFrom(
-                          backgroundColor:
-                              isSelected ? AppTheme.primary : Colors.white,
-                          foregroundColor:
-                              isSelected ? Colors.white : AppTheme.primary,
-                          side: const BorderSide(color: AppTheme.primary),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 8,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18),
-                          ),
+              const SizedBox(height: 18),
+              SizedBox(
+                height: 44,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: <Widget>[
+                    _CityChip(
+                      label: 'All',
+                      isSelected: _selectedProvince == null,
+                      onTap: () => _openProvince(null),
+                    ),
+                    const SizedBox(width: 8),
+                    ..._provinces.map((String province) {
+                      final bool isSelected = province == _selectedProvince;
+                      return Padding(
+                        padding: EdgeInsets.only(
+                          right: province == _provinces.last ? 0 : 8,
                         ),
-                        child: Text(
-                          city,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
+                        child: _CityChip(
+                          label: province,
+                          isSelected: isSelected,
+                          onTap: () => _openProvince(province),
                         ),
-                      ),
-                    );
-                  }).toList(),
+                      );
+                    }),
+                  ],
                 ),
+              ),
+              const SizedBox(height: 18),
+              Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Text(
+                      _resultHeading(),
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                        color: AppTheme.textPrimary,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    '$_resultCount results',
+                    style: const TextStyle(
+                      color: AppTheme.textMuted,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 14),
-              const Divider(height: 1),
-              const SizedBox(height: 12),
-              Text(
-                'Filtered ($_resultCount)',
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 12),
               Expanded(
-                child: ListView.separated(
-                  itemCount: _results.length,
-                  padding: const EdgeInsets.only(bottom: 18),
-                  separatorBuilder: (_, __) => const SizedBox(height: 14),
-                  itemBuilder: (context, index) {
-                    final result = _results[index];
-                    return _SearchResultCard(
-                      result: result,
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => HotelDetailsScreen(
-                            bookingFlow: BookingFlowData.fromResult(result),
+                child: _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : _results.isEmpty
+                        ? const Center(
+                            child: Text(
+                              'No hotels matched your search yet.',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: AppTheme.textSecondary,
+                              ),
+                            ),
+                          )
+                        : ListView.separated(
+                            itemCount: _results.length,
+                            padding: const EdgeInsets.only(bottom: 18),
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(height: 14),
+                            itemBuilder: (BuildContext context, int index) {
+                              final SearchResultItem result = _results[index];
+                              return _SearchResultCard(
+                                result: result,
+                                onTap: () => Navigator.of(context).push(
+                                  MaterialPageRoute<void>(
+                                    builder: (_) => HotelDetailsScreen(
+                                      bookingFlow:
+                                          BookingFlowData.fromResult(result),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
                           ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
               ),
             ],
           ),
         ),
       ),
-      bottomNavigationBar: Container(
-        height: 92,
-        decoration: const BoxDecoration(
-          color: AppTheme.primary,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(18),
-            topRight: Radius.circular(18),
+      bottomNavigationBar: SafeArea(
+        minimum: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+          decoration: BoxDecoration(
+            color: AppTheme.primary,
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: AppTheme.cardShadow,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: <Widget>[
+              _BottomNavItem(
+                icon: Icons.home_rounded,
+                label: 'Home',
+                selected: false,
+                onTap: () => _openShellTab(0),
+              ),
+              _BottomNavItem(
+                icon: Icons.search_rounded,
+                label: 'Search',
+                selected: true,
+                onTap: () => _openShellTab(1),
+              ),
+              _BottomNavItem(
+                icon: Icons.calendar_month_rounded,
+                label: 'Booking',
+                selected: false,
+                onTap: () => _openShellTab(2),
+              ),
+              _BottomNavItem(
+                icon: Icons.person_rounded,
+                label: 'Profile',
+                selected: false,
+                onTap: () => _openShellTab(3),
+              ),
+            ],
           ),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _BottomNavItem(
-              icon: Icons.home_outlined,
-              label: 'Home',
-              selected: false,
-              onTap: () => _openShellTab(0),
-            ),
-            _BottomNavItem(
-              icon: Icons.search_rounded,
-              label: 'Search',
-              selected: true,
-              onTap: () => _openShellTab(1),
-            ),
-            _BottomNavItem(
-              icon: Icons.wallet_membership_outlined,
-              label: 'Booking',
-              selected: false,
-              onTap: () => _openShellTab(2),
-            ),
-            _BottomNavItem(
-              icon: Icons.person_outline_rounded,
-              label: 'Profile',
-              selected: false,
-              onTap: () => _openShellTab(3),
-            ),
-          ],
-        ),
+      ),
+    );
+  }
+}
+
+class _CityChip extends StatelessWidget {
+  const _CityChip({
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton(
+      onPressed: onTap,
+      style: OutlinedButton.styleFrom(
+        backgroundColor: isSelected ? AppTheme.primary : AppTheme.surface,
+        foregroundColor: isSelected ? Colors.white : AppTheme.textSecondary,
+        side:
+            BorderSide(color: isSelected ? AppTheme.primary : AppTheme.border),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
       ),
     );
   }
@@ -203,128 +364,106 @@ class _SearchResultCard extends StatelessWidget {
   final SearchResultItem result;
   final VoidCallback onTap;
 
-  Widget _buildImage() {
-    final source = result.imageUrl;
-    if (source == null || source.trim().isEmpty) {
-      return Container(color: Color(result.imageColor));
-    }
-
-    final uri = Uri.tryParse(source);
-    final isNetworkImage = uri != null &&
-        uri.hasScheme &&
-        (uri.scheme == 'http' || uri.scheme == 'https');
-
-    if (isNetworkImage) {
-      return Image.network(
-        source,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return Container(color: Color(result.imageColor));
-        },
-      );
-    }
-
-    return Image.asset(
-      source,
-      fit: BoxFit.cover,
-      errorBuilder: (context, error, stackTrace) {
-        return Container(color: Color(result.imageColor));
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final starCount = result.rating.round().clamp(1, 5);
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        height: 150,
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: const Color.fromARGB(255, 201, 201, 201)),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x18000000),
-              blurRadius: 14,
-              offset: Offset(0, 6),
-            ),
-          ],
-        ),
-        child: SizedBox(
-          height: 84,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(24),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppTheme.surface,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: AppTheme.border),
+            boxShadow: AppTheme.cardShadow,
+          ),
           child: Row(
-            children: [
+            children: <Widget>[
               ClipRRect(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(20),
                 child: SizedBox(
-                  width: 160,
-                  height: 130,
-                  child: _buildImage(),
+                  width: 112,
+                  height: 116,
+                  child: HotelImage(
+                    source: result.imageUrl,
+                    fallbackColor: result.imageColor,
+                  ),
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+                  children: <Widget>[
                     Text(
                       result.name,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: AppTheme.primary,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      result.city,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        color: AppTheme.textSecondary,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        color: AppTheme.textPrimary,
+                        height: 1.1,
                       ),
                     ),
                     const SizedBox(height: 8),
+                    Text(
+                      result.locationLabel,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: AppTheme.textSecondary,
+                        height: 1.35,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
                     Row(
-                      children: List.generate(
-                        starCount,
-                        (_) => const Padding(
-                          padding: EdgeInsets.only(right: 2),
-                          child: Icon(
-                            Icons.star_rounded,
-                            size: 18,
-                            color: Color(0xFFFFB800),
+                      children: <Widget>[
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppTheme.surfaceSoft,
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              const Icon(
+                                Icons.star_rounded,
+                                size: 22,
+                                color: Color(0xFFFFC44D),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                result.rating.toStringAsFixed(1),
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppTheme.textPrimary,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ),
+                        const Spacer(),
+                        Text(
+                          '\$${result.price}',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                            color: AppTheme.primary,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(width: 8),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  const Icon(
-                    Icons.bookmark_border_rounded,
-                    color: AppTheme.primary,
-                  ),
-                  Text(
-                    '\$${result.price}',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: AppTheme.primary,
-                    ),
-                  ),
-                ],
               ),
             ],
           ),
@@ -349,25 +488,43 @@ class _BottomNavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(18),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: Colors.white, size: selected ? 35 : 30),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: const TextStyle(
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOut,
+          padding: EdgeInsets.symmetric(
+            horizontal: selected ? 16 : 10,
+            vertical: 10,
+          ),
+          decoration: BoxDecoration(
+            color: selected ? const Color(0x26FFFFFF) : Colors.transparent,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Icon(
+                icon,
                 color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
+                size: selected ? 22 : 20,
               ),
-            ),
-          ],
+              if (selected) ...<Widget>[
+                const SizedBox(width: 8),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );

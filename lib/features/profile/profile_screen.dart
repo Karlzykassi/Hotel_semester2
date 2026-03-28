@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:hote_v2/core/services/app_services.dart';
 import 'package:hote_v2/core/theme/app_theme.dart';
+import 'package:hote_v2/data/models/user_profile.dart';
 import 'package:hote_v2/features/onboarding/onboarding_screen.dart';
 import 'package:hote_v2/shared/components/primary_button.dart';
 
@@ -14,20 +16,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
   static const Color _panelColor = Color(0xFFF7F5F4);
   static const Color _dangerColor = Color(0xFFE53935);
 
-  _ProfileDetails _profile = const _ProfileDetails(
+  UserProfile _profile = const UserProfile(
     firstName: 'Seong-hyeon',
     lastName: 'Eom',
     dateOfBirth: 'January 13, 2009',
-    email: 'Eom Seong-hyeon4@gmail.com',
+    email: 'eom.seonghyeon4@gmail.com',
     country: 'Cambodia',
     phoneNumber: '081991186',
     gender: 'Male',
     language: 'English',
   );
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    final UserProfile profile = await AppServices.profile.fetchProfile();
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _profile = profile;
+      _isLoading = false;
+    });
+  }
 
   Future<void> _openEditProfile() async {
-    final updatedProfile = await Navigator.of(context).push<_ProfileDetails>(
-      MaterialPageRoute<_ProfileDetails>(
+    final UserProfile? updatedProfile =
+        await Navigator.of(context).push<UserProfile>(
+      MaterialPageRoute<UserProfile>(
         builder: (_) => _EditProfileScreen(profile: _profile),
       ),
     );
@@ -48,7 +70,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  void _logout() {
+  Future<void> _logout() async {
+    await AppServices.auth.signOut();
+    if (!mounted) {
+      return;
+    }
+
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute<void>(builder: (_) => const OnboardingScreen()),
@@ -60,83 +87,86 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFFFDFB),
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return Center(
-              child: SizedBox(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 18),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _ProfileHeader(
-                        profile: _profile,
-                        onEditTap: _openEditProfile,
-                      ),
-                      const SizedBox(height: 30),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: _panelColor,
-                          borderRadius: BorderRadius.circular(24),
-                        ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SafeArea(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return Center(
+                    child: SizedBox(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.fromLTRB(16, 14, 16, 18),
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            _ProfileMenuTile(
-                              icon: Icons.person_outline_rounded,
-                              title: 'Edit Profile',
-                              onTap: _openEditProfile,
+                            _ProfileHeader(
+                              profile: _profile,
+                              onEditTap: _openEditProfile,
                             ),
-                            const Divider(height: 1),
-                            _ProfileMenuTile(
-                              icon: Icons.language_rounded,
-                              title: 'Language',
-                              trailingText: _profile.language,
-                              onTap: () => _showComingSoon('Language'),
+                            const SizedBox(height: 30),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: _panelColor,
+                                borderRadius: BorderRadius.circular(24),
+                              ),
+                              child: Column(
+                                children: [
+                                  _ProfileMenuTile(
+                                    icon: Icons.person_outline_rounded,
+                                    title: 'Edit Profile',
+                                    onTap: _openEditProfile,
+                                  ),
+                                  const Divider(height: 1),
+                                  _ProfileMenuTile(
+                                    icon: Icons.language_rounded,
+                                    title: 'Language',
+                                    trailingText: _profile.language,
+                                    onTap: () => _showComingSoon('Language'),
+                                  ),
+                                  const Divider(height: 1),
+                                  _ProfileMenuTile(
+                                    icon: Icons.notifications_none_rounded,
+                                    title: 'Notifications',
+                                    onTap: () =>
+                                        _showComingSoon('Notification'),
+                                  ),
+                                  const Divider(height: 1),
+                                  _ProfileMenuTile(
+                                    icon: Icons.verified_user_outlined,
+                                    title: 'Security',
+                                    onTap: () => _showComingSoon('Security'),
+                                  ),
+                                  const Divider(height: 1),
+                                  _ProfileMenuTile(
+                                    icon: Icons.help_outline_rounded,
+                                    title: 'Help',
+                                    onTap: () => _showComingSoon('Help'),
+                                  ),
+                                ],
+                              ),
                             ),
-                            const Divider(height: 1),
-                            _ProfileMenuTile(
-                              icon: Icons.notifications_none_rounded,
-                              title: 'Notifications',
-                              onTap: () => _showComingSoon('Notification'),
-                            ),
-                            const Divider(height: 1),
-                            _ProfileMenuTile(
-                              icon: Icons.verified_user_outlined,
-                              title: 'Security',
-                              onTap: () => _showComingSoon('Security'),
-                            ),
-                            const Divider(height: 1),
-                            _ProfileMenuTile(
-                              icon: Icons.help_outline_rounded,
-                              title: 'Help',
-                              onTap: () => _showComingSoon('Help'),
+                            const SizedBox(height: 18),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: _panelColor,
+                                borderRadius: BorderRadius.circular(24),
+                              ),
+                              child: _ProfileMenuTile(
+                                icon: Icons.logout_rounded,
+                                iconColor: _dangerColor,
+                                title: 'Logout',
+                                titleColor: _dangerColor,
+                                onTap: _logout,
+                              ),
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 18),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: _panelColor,
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                        child: _ProfileMenuTile(
-                          icon: Icons.logout_rounded,
-                          iconColor: _dangerColor,
-                          title: 'Logout',
-                          titleColor: _dangerColor,
-                          onTap: _logout,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                    ),
+                  );
+                },
               ),
-            );
-          },
-        ),
-      ),
+            ),
     );
   }
 }
@@ -147,7 +177,7 @@ class _ProfileHeader extends StatelessWidget {
     required this.onEditTap,
   });
 
-  final _ProfileDetails profile;
+  final UserProfile profile;
   final VoidCallback onEditTap;
 
   @override
@@ -292,7 +322,7 @@ class _ProfileMenuTile extends StatelessWidget {
 class _EditProfileScreen extends StatefulWidget {
   const _EditProfileScreen({required this.profile});
 
-  final _ProfileDetails profile;
+  final UserProfile profile;
 
   @override
   State<_EditProfileScreen> createState() => _EditProfileScreenState();
@@ -416,8 +446,8 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
     }
   }
 
-  void _saveProfile() {
-    final updatedProfile = widget.profile.copyWith(
+  Future<void> _saveProfile() async {
+    final UserProfile updatedProfile = widget.profile.copyWith(
       firstName: _firstNameController.text.trim(),
       lastName: _lastNameController.text.trim(),
       dateOfBirth: _dateOfBirthController.text.trim(),
@@ -434,7 +464,23 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
       return;
     }
 
-    Navigator.of(context).pop(updatedProfile);
+    try {
+      final UserProfile savedProfile =
+          await AppServices.profile.updateProfile(updatedProfile);
+      if (!mounted) {
+        return;
+      }
+
+      Navigator.of(context).pop(savedProfile);
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error.toString())),
+      );
+    }
   }
 
   @override
@@ -674,67 +720,6 @@ class _EditField extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _ProfileDetails {
-  const _ProfileDetails({
-    required this.firstName,
-    required this.lastName,
-    required this.dateOfBirth,
-    required this.email,
-    required this.country,
-    required this.phoneNumber,
-    required this.gender,
-    required this.language,
-  });
-
-  final String firstName;
-  final String lastName;
-  final String dateOfBirth;
-  final String email;
-  final String country;
-  final String phoneNumber;
-  final String gender;
-  final String language;
-
-  String get fullName => '$lastName $firstName';
-
-  String get initials {
-    final first = firstName.isEmpty ? '' : firstName[0];
-    final last = lastName.isEmpty ? '' : lastName[0];
-    return '$last$first'.toUpperCase();
-  }
-
-  bool get hasEmptyRequiredField =>
-      firstName.isEmpty ||
-      lastName.isEmpty ||
-      dateOfBirth.isEmpty ||
-      email.isEmpty ||
-      country.isEmpty ||
-      phoneNumber.isEmpty ||
-      gender.isEmpty;
-
-  _ProfileDetails copyWith({
-    String? firstName,
-    String? lastName,
-    String? dateOfBirth,
-    String? email,
-    String? country,
-    String? phoneNumber,
-    String? gender,
-    String? language,
-  }) {
-    return _ProfileDetails(
-      firstName: firstName ?? this.firstName,
-      lastName: lastName ?? this.lastName,
-      dateOfBirth: dateOfBirth ?? this.dateOfBirth,
-      email: email ?? this.email,
-      country: country ?? this.country,
-      phoneNumber: phoneNumber ?? this.phoneNumber,
-      gender: gender ?? this.gender,
-      language: language ?? this.language,
     );
   }
 }

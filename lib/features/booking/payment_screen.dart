@@ -81,8 +81,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
             const SizedBox(height: 10),
             _PaymentMethodTile(
               title: 'ABA',
-              subtitle: 'Fast transfer',
-              leading: const _BankBadge(label: 'ABA'),
+              subtitle: 'Bank payment',
+              leading: const _BankBadge(
+                  label: 'ABA',
+                  color: Color(0xFF0B5B7A),
+                  imagePath: 'assets/aba.png'),
               selected: _selectedMethod == 'ABA',
               onTap: () => setState(() => _selectedMethod = 'ABA'),
             ),
@@ -90,15 +93,21 @@ class _PaymentScreenState extends State<PaymentScreen> {
             _PaymentMethodTile(
               title: 'Acleda',
               subtitle: 'Bank payment',
-              leading: const _BankBadge(label: 'A'),
+              leading: const _BankBadge(
+                  label: 'A',
+                  color: Color(0xFF0B5B7A),
+                  imagePath: 'assets/ac.png'),
               selected: _selectedMethod == 'Acleda',
               onTap: () => setState(() => _selectedMethod = 'Acleda'),
             ),
             const SizedBox(height: 10),
             _PaymentMethodTile(
               title: 'Wing',
-              subtitle: 'Mobile wallet',
-              leading: const _BankBadge(label: 'W'),
+              subtitle: 'Bank payment',
+              leading: const _BankBadge(
+                  label: 'W',
+                  color: Color.fromARGB(255, 40, 128, 2),
+                  imagePath: 'assets/wing.png'),
               selected: _selectedMethod == 'Wing',
               onTap: () => setState(() => _selectedMethod = 'Wing'),
             ),
@@ -106,7 +115,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
             _PaymentMethodTile(
               title: 'Cash',
               subtitle: 'Pay at hotel',
-              leading: const _BankBadge(label: '\$'),
+              leading: const _BankBadge(
+                  label: '\$',
+                  color: Color(0xFF0B5B7A),
+                  imagePath: 'assets/cash.png'),
               selected: _selectedMethod == 'Cash',
               onTap: () => setState(() => _selectedMethod = 'Cash'),
             ),
@@ -215,26 +227,27 @@ class _PaymentMethodTile extends StatelessWidget {
 }
 
 class _BankBadge extends StatelessWidget {
-  const _BankBadge({required this.label});
+  const _BankBadge(
+      {required this.label, required this.color, required this.imagePath});
 
   final String label;
+  final Color color;
+  final String imagePath;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 34,
+      width: 38,
       height: 34,
       alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: const Color(0xFF0B5B7A),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        label,
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.w700,
-        ),
+      // decoration: BoxDecoration(
+      //   color: color,
+      //   borderRadius: BorderRadius.circular(8),
+      // ),
+      child: Image.asset(
+        imagePath,
+        width: 70,
+        fit: BoxFit.contain,
       ),
     );
   }
